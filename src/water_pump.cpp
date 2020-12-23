@@ -31,20 +31,14 @@ float readPower() {
 }
 
 // power is a percentage
-void pump(int pumpTimeMs) {
+void pump(int pumpTimeMs, int pumpPower) {
   digitalWrite(LED_BUILTIN, HIGH);
   int durationMs = 0;
   while (durationMs < pumpTimeMs) {
-    powerPercent = round(255 * readPower());
-    analogWrite(pumpPin, powerPercent);   // pump on
+    analogWrite(pumpPin, pumpPower);   // pump on
     delay(100);
     durationMs += 100;
   }
   analogWrite(pumpPin, 0);     // pump off
   digitalWrite(LED_BUILTIN, LOW);
-}
-
-void loopPump() {
-  pump(onTimeMs); // pump for 15s at pwm power
-  delay(offTimeMs);
 }

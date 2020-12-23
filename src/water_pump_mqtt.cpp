@@ -13,7 +13,7 @@ CloudIoTCoreMqtt *mqtt;
 MQTTClient *mqttClient;
 unsigned long iat = 0;
 String jwt;
-int onTimeSeconds = 15; // pump for 15s
+char logMsg[50];
 
 String getJwt() {
   // Disable software watchdog as these operations can take a while.
@@ -24,13 +24,21 @@ String getJwt() {
 }
 
 void messageReceived(String &topic, String &payload) {
-  Serial.println("Received message on topic - " + topic + " - " + payload);
-  if (payload == "on") {
-    pump(onTimeSeconds * 1000);
-    // digitalWrite(LED_BUILTIN, HIGH);
-  } else if (payload == "off") {
-    // digitalWrite(LED_BUILTIN, LOW);
+  if (payload.length() == 0) {
+    return;
   }
+  Serial.println("Received message on topic - " + topic + " - " + payload);
+  // Format "015 255" means pump for 15s at full power
+  const char* command = payload.c_str();
+  char* value = strtok((char*) command, " ");
+  int durationSeconds = atoi(value);
+  value = strtok(NULL, " ");
+  int pumpPower = atoi(value);
+  sprintf(logMsg, "Duration: %ds, Power: %d", durationSeconds, pumpPower);
+  Serial.println(logMsg);
+
+  // Pump on
+  pump(durationSeconds * 1000, pumpPower);
 }
 
 void setupCloudIoT() {
